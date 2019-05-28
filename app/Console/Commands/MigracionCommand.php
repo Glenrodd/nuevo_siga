@@ -40,8 +40,17 @@ class MigracionCommand extends Command
         
         $this->info("Iniciando Migracion");
         // FACTURA TELEFERICO
-        $factura = DB::connection('pgsql_teleferico')->table('factura')->where('id_factura','=',1042)->first();
-        // CLIENTE FACTURA TELEFERICO
+        // $factura = DB::connection('pgsql_teleferico')->table('factura')->where('id_factura','=',1043)->first();
+        $facturas_teleferico = DB::connection('pgsql_teleferico')->table('factura')->orderBy('id_factura','ASC')->take(200)->get();
+        foreach ($facturas_teleferico as $factura) {
+            $factura_tele = DB::table('factura')->where('numero_factura',$factura->numero_factura)
+                        ->where('id_sucursal',$factura->id_sucursal)
+                        ->where('id_area',$factura->id_area)
+                        ->where('id_dosificacion',$factura->id_dosificacion)->first();
+            if ($factura_tele) {
+                $this->info("LA FACTURA EXISTE");
+            }else{
+                 // CLIENTE FACTURA TELEFERICO
         $cliente = DB::connection('pgsql_teleferico')->table('cliente')->where('id_cliente','=',$factura->id_cliente)->first();
         // CLIENTE FACTURA SERVER
         $cliente_server = DB::table('cliente')->where('nit_carnet',$cliente->nit_carnet)->first();
@@ -189,6 +198,10 @@ class MigracionCommand extends Command
         }
         
         $this->info("Fin Migración");
+
+            }
+        }
+       
     
     }
 }
